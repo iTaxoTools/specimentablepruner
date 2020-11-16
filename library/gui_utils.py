@@ -43,7 +43,7 @@ class FileOrDirChooser(FileChooser):
     Adds a button to choose a directory to FileChooser
     """
 
-    def __init__(self, parent: tk.Widget, *, label: str):
+    def __init__(self, parent: tk.Misc, *, label: str):
         super().__init__(parent, label=label, mode="open")
 
         def browse_dir() -> None:
@@ -64,7 +64,7 @@ class LabeledEntry():
     Group of a label, entry and a string variable
     """
 
-    def __init__(self, parent: tk.Widget, *, label: str):
+    def __init__(self, parent: tk.Misc, *, label: str):
         self.frame = ttk.Frame(parent)
         self.label = ttk.Label(self.frame, text=label)
         self.var = tk.StringVar()
@@ -80,7 +80,7 @@ class LabeledCombobox():
     Group of a label, combobox and a string variable
     """
 
-    def __init__(self, parent: tk.Widget, *, label: str, values: List[str]):
+    def __init__(self, parent: tk.Misc, *, label: str, values: List[str]):
         self.frame = ttk.Frame(parent)
         self.label = ttk.Label(self.frame, text=label)
         self.var = tk.StringVar()
@@ -97,7 +97,7 @@ class ScrolledText():
     A text input widget with two scrollbars
     """
 
-    def __init__(self, parent: tk.Widget, *, label: str, width: int, height: int) -> None:
+    def __init__(self, parent: tk.Misc, *, label: str, width: int, height: int) -> None:
         self.frame = ttk.Frame(parent)
         self.frame.rowconfigure(1, weight=1)
         self.frame.columnconfigure(0, weight=1)
