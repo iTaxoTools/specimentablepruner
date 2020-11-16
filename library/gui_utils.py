@@ -150,3 +150,25 @@ class FilesOrText():
                     yield file
         elif self.notebook.index('current') == 1:
             yield io.StringIO(self.textbox.get_text())
+
+
+class RadioGroup():
+    """
+    Generates a group of exclusive radiobuttons
+    """
+
+    def __init__(self, parent: tk.Misc, *, label: str, values: Dict[str, str], direction: Literal['horizontal', 'vertical']) -> None:
+        self.frame = ttk.Frame(parent)
+        self.label = ttk.Label(self.frame, text=label)
+        self.subframe = ttk.Frame(self.frame)
+        self.var = tk.StringVar()
+        self.radiobuttons = []
+        for name, value in values.items():
+            self.radiobuttons.append(ttk.Radiobutton(
+                self.subframe, text=name, variable=self.var, value=value))
+        dx, dy = (1, 0) if direction == 'horizontal' else (0, 1)
+        for i in range(len(values)):
+            self.radiobuttons[i].grid(row=i*dx, column=i*dy)
+        self.label.grid(row=0, column=0)
+        self.subframe.grid(row=1, column=0)
+        self.grid = self.frame.grid
