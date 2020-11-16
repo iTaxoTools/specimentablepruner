@@ -1,8 +1,9 @@
+import io
 import os.path
 import tkinter as tk
 import tkinter.filedialog
 import tkinter.ttk as ttk
-from typing import Literal, Any, Dict, Tuple, List
+from typing import Any, Dict, Iterator, List, Literal, TextIO, Tuple
 
 
 class FileChooser():
@@ -96,12 +97,12 @@ class ScrolledText():
     A text input widget with two scrollbars
     """
 
-    def __init__(self, parent: tk.Widget, *, label: str) -> None:
+    def __init__(self, parent: tk.Widget, *, label: str, width: int, height: int) -> None:
         self.frame = ttk.Frame(parent)
         self.frame.rowconfigure(1, weight=1)
         self.frame.columnconfigure(0, weight=1)
         self.label = ttk.Label(self.frame, text=label)
-        self.text = tk.Text(self.frame, width=50, height=20)
+        self.text = tk.Text(self.frame, width=width, height=height)
         self.vbar = ttk.Scrollbar(
             self.frame, orient=tk.VERTICAL, command=self.text.yview)
         self.hbar = ttk.Scrollbar(
@@ -113,3 +114,39 @@ class ScrolledText():
         self.vbar.grid(row=1, column=1, sticky='nsew')
         self.hbar.grid(row=2, column=0, sticky='nsew')
         self.grid = self.frame.grid
+
+    def get_text(self) -> str:
+        return self.text.get('1.0', 'end')
+
+
+class FilesOrText():
+    """
+    Two tabs: one for choosing a file, another for inputting text
+    """
+
+    def __init__(self, parent: tk.Misc, *, file_label: str, text_label: str, width: int, height: int) -> None:
+        """
+        width and height are the parameters of the textbox
+        file_label is shown at the file name entry
+        text_label is shown at the textbox
+        """
+        self.notebook = ttk.Notebook(parent)
+        self.filechooser = FileOrDirChooser(self.notebook, label=file_label)
+        self.textbox = ScrolledText(
+            self.notebook, label=text_label, width=width, height=height)
+        self.notebook.add(self.filechooser, text=file_label)
+        self.notebook.add(self.textbox, text=text_label)
+        self.grid = self.notebook.grid
+
+    def text(self) -> Iterator[TextIO]:
+        if self.notebook.index('current') == 0:
+            path = self.filechooser.file_var.get()
+            if os.path.isdir(path):
+                for entry in os.listdir(path):
+                    with open(entry.path) as file:
+                        yield file
+            else:
+                with open(path) as file:
+                    yield file
+        elif self.notebook.index('current') == 1:
+            yield io.StringIO(self.textbox.get_text())
