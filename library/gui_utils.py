@@ -124,14 +124,19 @@ class FilesOrText():
     Two tabs: one for choosing a file, another for inputting text
     """
 
-    def __init__(self, parent: tk.Misc, *, file_label: str, text_label: str, width: int, height: int) -> None:
+    def __init__(self, parent: tk.Misc, *, file_label: str, text_label: str, width: int, height: int, mode: Literal['open', 'save', 'opendir']) -> None:
         """
         width and height are the parameters of the textbox
         file_label is shown at the file name entry
         text_label is shown at the textbox
         """
         self.notebook = ttk.Notebook(parent)
-        self.filechooser = FileOrDirChooser(self.notebook, label=file_label)
+        if mode == 'opendir':
+            self.filechooser: FileChooser = FileOrDirChooser(
+                self.notebook, label=file_label)
+        else:
+            self.filechooser = FileChooser(
+                self.notebook, label=file_label, mode=mode)
         self.textbox = ScrolledText(
             self.notebook, label=text_label, width=width, height=height)
         self.notebook.add(self.filechooser, text=file_label)
@@ -150,6 +155,15 @@ class FilesOrText():
                     yield file
         elif self.notebook.index('current') == 1:
             yield io.StringIO(self.textbox.get_text())
+
+    def is_file(self) -> bool:
+        return self.notebook.index('current') == 0
+
+    def is_text(self) -> bool:
+        return self.notebook.index('current') == 1
+
+    def text_contents(self) -> str:
+        return self.textbox.get_text()
 
 
 class RadioGroup():
