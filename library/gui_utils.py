@@ -139,8 +139,8 @@ class FilesOrText():
                 self.notebook, label=file_label, mode=mode)
         self.textbox = ScrolledText(
             self.notebook, label=text_label, width=width, height=height)
-        self.notebook.add(self.filechooser, text=file_label)
-        self.notebook.add(self.textbox, text=text_label)
+        self.notebook.add(self.filechooser.frame, text=file_label)
+        self.notebook.add(self.textbox.frame, text=text_label)
         self.grid = self.notebook.grid
 
     def text(self) -> Iterator[TextIO]:
@@ -165,6 +165,9 @@ class FilesOrText():
     def text_contents(self) -> str:
         return self.textbox.get_text()
 
+    def file_name(self) -> str:
+        return self.filechooser.file_var.get()
+
 
 class RadioGroup():
     """
@@ -174,7 +177,7 @@ class RadioGroup():
     def __init__(self, parent: tk.Misc, *, label: str, values: Dict[str, str], direction: Literal['horizontal', 'vertical']) -> None:
         self.frame = ttk.Frame(parent)
         self.label = ttk.Label(self.frame, text=label)
-        self.subframe = ttk.Frame(self.frame)
+        self.subframe = ttk.Frame(self.frame, relief='sunken', padding=5)
         self.var = tk.StringVar()
         self.radiobuttons = []
         for name, value in values.items():
@@ -182,7 +185,7 @@ class RadioGroup():
                 self.subframe, text=name, variable=self.var, value=value))
         dx, dy = (1, 0) if direction == 'horizontal' else (0, 1)
         for i in range(len(values)):
-            self.radiobuttons[i].grid(row=i*dx, column=i*dy)
-        self.label.grid(row=0, column=0)
-        self.subframe.grid(row=1, column=0)
+            self.radiobuttons[i].grid(row=i*dy, column=i*dx, sticky="w")
+        self.label.grid(row=0, column=0, sticky="w")
+        self.subframe.grid(row=1, column=0, sticky="nsew")
         self.grid = self.frame.grid
