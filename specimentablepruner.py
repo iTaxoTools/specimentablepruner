@@ -34,7 +34,6 @@ class Pruner():
         else:
             pruning_values = lines
         self.pruning_values = set(pruning_values)
-        print(pruning_values)
 
     def set_files(self, infile: TextIO, backup_outname: str) -> None:
         self.input_file = infile
@@ -103,7 +102,6 @@ def gui_main() -> None:
                 pruner.output_file.close()
         except Exception as ex:
             tk.messagebox.showerror("Error", str(ex))
-            raise ex
         else:
             tk.messagebox.showinfo("Done", "Pruning is complete")
 
