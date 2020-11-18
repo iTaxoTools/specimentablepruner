@@ -30,7 +30,7 @@ class Pruner():
     def pruning_from_str(self, text: str) -> None:
         lines = text.split("\n")
         if len(lines) == 1:
-            pruning_values = str.split(',')
+            pruning_values = lines[0].split(',')
         else:
             pruning_values = lines
         self.pruning_values = set(pruning_values)
