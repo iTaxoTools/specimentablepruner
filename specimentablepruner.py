@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from library.gui_utils import *
 import pandas as pd
-import tkinter.messagebox
+import tkinter.messagebox as tkmessagebox
 from typing import Set
 
 format_dict = {
