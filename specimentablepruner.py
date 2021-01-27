@@ -48,8 +48,11 @@ class Pruner():
 
     def prune(self) -> None:
         table = pd.read_csv(self.input_file, sep=self.input_sep)
-        table = table.loc[~table[self.pruning_field].isin(
-            self.pruning_values)]
+        try:
+            table = table.loc[~table[self.pruning_field].isin(
+                self.pruning_values)]
+        except KeyError as ex:
+            raise ValueError(f"Input file doesn't contain column {self.pruning_field}") from ex
         table.to_csv(self.output_file, sep=self.output_sep)
 
 
@@ -101,9 +104,10 @@ def gui_main() -> None:
                 pruner.prune()
                 pruner.output_file.close()
         except Exception as ex:
-            tk.messagebox.showerror("Error", str(ex))
+            tkmessagebox.showerror("Error", str(ex))
+            raise Exception from ex
         else:
-            tk.messagebox.showinfo("Done", "Pruning is complete")
+            tkmessagebox.showinfo("Done", "Pruning is complete")
 
     prune_btn = ttk.Button(root, text="Prune", command=prune)
 
