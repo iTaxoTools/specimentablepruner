@@ -44,7 +44,7 @@ class Pruner():
         else:
             base, ext = os.path.splitext(input_name)
             output_name = base + "_pruned" + ext
-        self.output_file = open(output_name, mode='w', newline='')
+        self.output_file = open(output_name, mode='w', newline='', errors='replace')
 
     def prune(self) -> None:
         table = pd.read_csv(self.input_file, sep=self.input_sep)
@@ -89,7 +89,7 @@ def gui_main() -> None:
             pruner.set_pruning_field(prune_field_cmb.var.get())
 
             if prune_widget.is_file():
-                with open(prune_widget.file_name()) as prune_file:
+                with open(prune_widget.file_name(), errors='replace') as prune_file:
                     pruner.pruning_from_file(prune_file)
             elif prune_widget.is_text():
                 pruner.pruning_from_str(prune_widget.text_contents())

@@ -152,10 +152,10 @@ class FilesOrText():
             path = self.filechooser.file_var.get()
             if os.path.isdir(path):
                 for entry in os.listdir(path):
-                    with open(entry.path) as file:
+                    with open(entry.path, errors='replace') as file:
                         yield file
             else:
-                with open(path) as file:
+                with open(path, errors='replace') as file:
                     yield file
         elif self.notebook.index('current') == 1:
             yield io.StringIO(self.textbox.get_text())
