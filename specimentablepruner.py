@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from library.gui_utils import *
 import pandas as pd
-import tkinter.messagebox
+import tkinter.messagebox as tkmessagebox
 from typing import Set
 
 format_dict = {
@@ -44,12 +44,15 @@ class Pruner():
         else:
             base, ext = os.path.splitext(input_name)
             output_name = base + "_pruned" + ext
-        self.output_file = open(output_name, mode='w', newline='')
+        self.output_file = open(output_name, mode='w', newline='', errors='replace')
 
     def prune(self) -> None:
         table = pd.read_csv(self.input_file, sep=self.input_sep)
-        table = table.loc[~table[self.pruning_field].isin(
-            self.pruning_values)]
+        try:
+            table = table.loc[~table[self.pruning_field].isin(
+                self.pruning_values)]
+        except KeyError as ex:
+            raise ValueError(f"Input file doesn't contain column {self.pruning_field}") from ex
         table.to_csv(self.output_file, sep=self.output_sep)
 
 
@@ -89,7 +92,7 @@ def gui_main() -> None:
             pruner.set_pruning_field(prune_field_cmb.var.get())
 
             if prune_widget.is_file():
-                with open(prune_widget.file_name()) as prune_file:
+                with open(prune_widget.file_name(), errors='replace') as prune_file:
                     pruner.pruning_from_file(prune_file)
             elif prune_widget.is_text():
                 pruner.pruning_from_str(prune_widget.text_contents())
@@ -101,9 +104,10 @@ def gui_main() -> None:
                 pruner.prune()
                 pruner.output_file.close()
         except Exception as ex:
-            tk.messagebox.showerror("Error", str(ex))
+            tkmessagebox.showerror("Error", str(ex))
+            raise Exception from ex
         else:
-            tk.messagebox.showinfo("Done", "Pruning is complete")
+            tkmessagebox.showinfo("Done", "Pruning is complete")
 
     prune_btn = ttk.Button(root, text="Prune", command=prune)
 

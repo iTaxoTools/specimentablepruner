@@ -1,9 +1,9 @@
 import io
 import os.path
 import tkinter as tk
-import tkinter.filedialog
+import tkinter.filedialog as tkfiledialog
 import tkinter.ttk as ttk
-from typing import Any, Dict, Iterator, List, Literal, TextIO, Tuple
+from typing import Any, Dict, Iterator, List, TextIO, Optional
 
 
 class FileChooser():
@@ -11,19 +11,22 @@ class FileChooser():
     Creates a frame with a label, entry and browse button for choosing files
     """
 
-    def __init__(self, parent: Any, *, label: str, mode: Literal["open", "save"]):
+    def __init__(self, parent: Any, *, label: str, mode: str):
         self.frame = ttk.Frame(parent)
         self.frame.columnconfigure([0, 1], weight=1)
         self.label = ttk.Label(self.frame, text=label)
         self.file_var = tk.StringVar()
         self.entry = ttk.Entry(self.frame, textvariable=self.file_var)
         if mode == "open":
-            self._dialog = tk.filedialog.askopenfilename
+            self._dialog = tkfiledialog.askopenfilename
         elif mode == "save":
-            self._dialog = tk.filedialog.asksaveasfilename
+            self._dialog = tkfiledialog.asksaveasfilename
+        else: # assume "open"
+            self._dialog = tkfiledialog.askopenfilename
 
         def browse() -> None:
-            if (newpath := self._dialog()):
+            newpath: Optional[str] = self._dialog()
+            if newpath:
                 try:
                     newpath = os.path.relpath(newpath)
                 except:
@@ -47,7 +50,8 @@ class FileOrDirChooser(FileChooser):
         super().__init__(parent, label=label, mode="open")
 
         def browse_dir() -> None:
-            if (newpath := tk.filedialog.askdirectory()):
+            newpath: Optional[str] = tkfiledialog.askdirectory()
+            if newpath:
                 try:
                     newpath = os.path.relpath(newpath)
                 except:
@@ -124,7 +128,7 @@ class FilesOrText():
     Two tabs: one for choosing a file, another for inputting text
     """
 
-    def __init__(self, parent: tk.Misc, *, file_label: str, text_label: str, width: int, height: int, mode: Literal['open', 'save', 'opendir']) -> None:
+    def __init__(self, parent: tk.Misc, *, file_label: str, text_label: str, width: int, height: int, mode: str) -> None:
         """
         width and height are the parameters of the textbox
         file_label is shown at the file name entry
@@ -148,10 +152,10 @@ class FilesOrText():
             path = self.filechooser.file_var.get()
             if os.path.isdir(path):
                 for entry in os.listdir(path):
-                    with open(entry.path) as file:
+                    with open(entry.path, errors='replace') as file:
                         yield file
             else:
-                with open(path) as file:
+                with open(path, errors='replace') as file:
                     yield file
         elif self.notebook.index('current') == 1:
             yield io.StringIO(self.textbox.get_text())
@@ -174,7 +178,7 @@ class RadioGroup():
     Generates a group of exclusive radiobuttons
     """
 
-    def __init__(self, parent: tk.Misc, *, label: str, values: Dict[str, str], direction: Literal['horizontal', 'vertical']) -> None:
+    def __init__(self, parent: tk.Misc, *, label: str, values: Dict[str, str], direction: str) -> None:
         self.frame = ttk.Frame(parent)
         self.label = ttk.Label(self.frame, text=label)
         self.subframe = ttk.Frame(self.frame, relief='sunken', padding=5)
