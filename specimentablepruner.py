@@ -3,6 +3,8 @@ from library.gui_utils import *
 import pandas as pd
 import tkinter.messagebox as tkmessagebox
 from typing import Set
+import re
+import sys
 
 format_dict = {
     "tab": '\t',
@@ -10,8 +12,13 @@ format_dict = {
     "CSV (semicolon delimited)": ';'
 }
 
+fuzzy_pruning_regex = re.compile(r'[- _./\\]+')
+
 
 class Pruner():
+
+    def __init__(self) -> None:
+        self.fuzzy_pruning = False
 
     def set_input_sep(self, sep: str) -> None:
         self.input_sep = sep
@@ -23,8 +30,11 @@ class Pruner():
         self.pruning_field = field
 
     def pruning_from_file(self, file: TextIO) -> None:
-        column = pd.read_csv(file, sep=self.input_sep, usecols=[
-                             self.pruning_field], squeeze=True)
+        try:
+            column = pd.read_csv(file, sep=self.input_sep, usecols=[
+                                 self.pruning_field], squeeze=True)
+        except ValueError:
+            raise ValueError(f"Pruning file {file.name} seems to be missing {self.pruning_field}")
         self.pruning_values: Set[str] = set(column.unique())
 
     def pruning_from_str(self, text: str) -> None:
@@ -34,6 +44,11 @@ class Pruner():
         else:
             pruning_values = lines
         self.pruning_values = set(pruning_values)
+
+    def set_fuzzy_pruning(self) -> None:
+        self.fuzzy_pruning = True
+        self.pruning_values = {fuzzy_pruning_regex.sub("", s.casefold()) for s in self.pruning_values}
+
 
     def set_files(self, infile: TextIO, backup_outname: str) -> None:
         self.input_file = infile
@@ -49,11 +64,15 @@ class Pruner():
     def prune(self) -> None:
         table = pd.read_csv(self.input_file, sep=self.input_sep)
         try:
-            table = table.loc[~table[self.pruning_field].isin(
-                self.pruning_values)]
+            pruning_column = table[self.pruning_field]
         except KeyError as ex:
             raise ValueError(f"Input file doesn't contain column {self.pruning_field}") from ex
-        table.to_csv(self.output_file, sep=self.output_sep)
+        else:
+            if self.fuzzy_pruning:
+                pruning_column = pruning_column.str.casefold().replace(fuzzy_pruning_regex, "")
+            table = table.loc[~pruning_column.isin(
+                self.pruning_values)]
+        table.to_csv(self.output_file, sep=self.output_sep, index=False)
 
 
 def gui_main() -> None:
@@ -96,6 +115,9 @@ def gui_main() -> None:
                     pruner.pruning_from_file(prune_file)
             elif prune_widget.is_text():
                 pruner.pruning_from_str(prune_widget.text_contents())
+
+            if "fuzzy" in sys.argv:
+                pruner.set_fuzzy_pruning()
 
             backup_outfile_name = output_file_chooser.file_var.get()
 
