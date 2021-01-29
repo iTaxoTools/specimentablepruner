@@ -103,6 +103,9 @@ def gui_main() -> None:
         "specimenid", "species", "voucher", "locality"])
     prune_field_cmb.var.set("specimenid")
 
+    fuzzy_pruning_var = tk.BooleanVar()
+    fuzzy_pruning_chk = ttk.Checkbutton(root, text="Allow for common misspellings of prune value", variable=fuzzy_pruning_var)
+
     bottom_frame = ttk.Frame(root)
     input_format_chooser = RadioGroup(
         bottom_frame, label="Format of the input file", values=format_dict, direction='vertical')
@@ -126,7 +129,7 @@ def gui_main() -> None:
             elif prune_widget.is_text():
                 pruner.pruning_from_str(prune_widget.text_contents())
 
-            if "fuzzy" in sys.argv:
+            if fuzzy_pruning_var.get():
                 pruner.set_fuzzy_pruning()
 
             backup_outfile_name = output_file_chooser.file_var.get()
@@ -151,10 +154,12 @@ def gui_main() -> None:
     prune_field_cmb.grid(row=3, column=0, columnspan=2)
     prune_widget.grid(row=2, column=1, sticky="nsew", padx=5, pady=5)
 
+    fuzzy_pruning_chk.grid(row=4, column=0, columnspan=2)
+
     input_format_chooser.grid(row=2, column=0)
     prune_btn.grid(row=2, column=1, padx=10)
     output_format_chooser.grid(row=2, column=2)
-    bottom_frame.grid(row=4, column=0, columnspan=2)
+    bottom_frame.grid(row=5, column=0, columnspan=2)
 
     root.rowconfigure(2, weight=1)
     root.columnconfigure(0, weight=1)
