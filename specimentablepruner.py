@@ -2,6 +2,7 @@
 from library.gui_utils import *
 import pandas as pd
 import tkinter.messagebox as tkmessagebox
+import tkinter.font as tkfont
 from typing import Set
 import re
 import sys
@@ -77,28 +78,37 @@ class Pruner():
 
 def gui_main() -> None:
     root = tk.Tk()
-    root.rowconfigure(0, weight=1)
-    root.rowconfigure(2, weight=1)
-    root.columnconfigure(0, weight=1)
+    root.title("Specimentablepruner")
+    if os.name == "nt":
+        root.wm_iconbitmap(os.path.join(sys.path[0], 'data', 'specimentablepruner_icon.ico'))
+
+    stype = ttk.Style()
+    stype.configure(style="PruneButton.TButton", background="blue")
+
+    banner_frame = ttk.Frame(root)
+    logo_img = tk.PhotoImage(file=os.path.join(sys.path[0], 'data', 'iTaxoTools Digital linneaeus MICROLOGO.png'))
+    ttk.Label(banner_frame, image=logo_img).grid(row=0, column=0, sticky="nsw")
+    ttk.Label(banner_frame, text="Tool to merge the content of tables based on specimen identifiers or species names", font = tkfont.Font(size=14)).grid(row=0, column=2) 
 
     input_widget = FilesOrText(
-        root, file_label="Input file", text_label="Input_text", width=20, height=20, mode='opendir')
+        root, file_label="Input file", text_label="Input_text", width=35, height=10, mode='opendir')
     output_file_chooser = FileChooser(
         input_widget.textbox.frame, label="Output file", mode="save")
     output_file_chooser.grid(row=3, column=0)
 
     prune_widget = FilesOrText(root, file_label="Prune file",
-                               text_label="Prune values", width=20, height=20, mode='open')
+                               text_label="Prune values", width=35, height=10, mode='open')
 
     prune_field_cmb = LabeledCombobox(root, label="Field to prune", values=[
         "specimenid", "species", "voucher", "locality"])
     prune_field_cmb.var.set("specimenid")
 
+    bottom_frame = ttk.Frame(root)
     input_format_chooser = RadioGroup(
-        root, label="Format of the input file", values=format_dict, direction='vertical')
+        bottom_frame, label="Format of the input file", values=format_dict, direction='vertical')
     input_format_chooser.var.set('\t')
     output_format_chooser = RadioGroup(
-        root, label="Format of the input file", values=format_dict, direction='vertical')
+        bottom_frame, label="Format of the output file", values=format_dict, direction='vertical')
     output_format_chooser.var.set('\t')
 
     pruner = Pruner()
@@ -131,15 +141,24 @@ def gui_main() -> None:
         else:
             tkmessagebox.showinfo("Done", "Pruning is complete")
 
-    prune_btn = ttk.Button(root, text="Prune", command=prune)
+    prune_btn = ttk.Button(bottom_frame, text="Prune", command=prune, style="PruneButton.TButton")
 
-    input_widget.grid(row=0, column=0, sticky="nsew")
-    prune_field_cmb.grid(row=1, column=0)
-    prune_widget.grid(row=2, column=0, sticky="nsew")
+    banner_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
-    input_format_chooser.grid(row=1, column=1)
-    prune_btn.grid(row=1, column=2)
-    output_format_chooser.grid(row=1, column=3)
+    ttk.Separator(root, orient='horizontal').grid(row=1, column=0, columnspan=2, sticky="nsew")
+
+    input_widget.grid(row=2, column=0, sticky="nsew", padx=5, pady=5)
+    prune_field_cmb.grid(row=3, column=0, columnspan=2)
+    prune_widget.grid(row=2, column=1, sticky="nsew", padx=5, pady=5)
+
+    input_format_chooser.grid(row=2, column=0)
+    prune_btn.grid(row=2, column=1, padx=10)
+    output_format_chooser.grid(row=2, column=2)
+    bottom_frame.grid(row=4, column=0, columnspan=2)
+
+    root.rowconfigure(2, weight=1)
+    root.columnconfigure(0, weight=1)
+    root.columnconfigure(1, weight=1)
 
     root.mainloop()
 
