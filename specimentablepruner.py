@@ -88,7 +88,7 @@ def gui_main() -> None:
     banner_frame = ttk.Frame(root)
     logo_img = tk.PhotoImage(file=os.path.join(sys.path[0], 'data', 'iTaxoTools Digital linneaeus MICROLOGO.png'))
     ttk.Label(banner_frame, image=logo_img).grid(row=0, column=0, sticky="nsw")
-    ttk.Label(banner_frame, text="Tool to merge the content of tables based on specimen identifiers or species names", font = tkfont.Font(size=14)).grid(row=0, column=2) 
+    ttk.Label(banner_frame, text="Tool to prune rows from tables based on lists of specimen identifiers or species names", font = tkfont.Font(size=14)).grid(row=0, column=2) 
 
     input_widget = FilesOrText(
         root, file_label="Input file", text_label="Input_text", width=35, height=10, mode='opendir')
